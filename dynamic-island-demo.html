@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dynamic Island</title>
+<style>
+:root{--u:calc(min(100vw - 32px, 420px) / 420);
+--page:#f3f0ea;--ink:#16161d;--mut:#6b6b78;--chip:#e4dfd6;--on:#16161d;--onink:#f3f0ea;
+--ac:#5eead4;--w1:#5eead4;--w2:#8b5cf6;--w3:#38bdf8;--wb:#1b2a4a;--ok:#34d399;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root[data-skin="sunset"]{--ac:#fdba74;--w1:#fb923c;--w2:#f43f5e;--w3:#fde68a;--wb:#3b1230}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--page:#0d0d13;--ink:#f1f1f6;--mut:#9a9aab;--chip:#1b1b26;--on:#f1f1f6;--onink:#0d0d13}}
+:root[data-theme="dark"]{--page:#0d0d13;--ink:#f1f1f6;--mut:#9a9aab;--chip:#1b1b26;--on:#f1f1f6;--onink:#0d0d13}
+html{min-height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100%;background:var(--page);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-tap-highlight-color:transparent;transition:background .3s}
+main{display:grid;justify-items:center;gap:14px;padding:32px 16px 40px}
+.h{margin:12px 0 0;font:600 12px/1 ui-monospace,Menlo,monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--mut)}
+.stage{position:relative;width:calc(420 * var(--u));height:calc(190 * var(--u));border-radius:calc(30 * var(--u));overflow:hidden;background:var(--wb);isolation:isolate}
+.wall{position:absolute;inset:0;background:radial-gradient(at 18% 12%,var(--w1) 0,transparent 55%),radial-gradient(at 85% 20%,var(--w2) 0,transparent 58%),radial-gradient(at 50% 110%,var(--w3) 0,transparent 62%)}
+.clock{position:absolute;left:0;right:0;bottom:calc(18 * var(--u));text-align:center;font-weight:600;font-size:calc(56 * var(--u));line-height:1;color:rgba(255,255,255,.82);letter-spacing:-.02em}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.chips button{border:0;border-radius:999px;padding:9px 16px;font:600 13px/1 inherit;font-family:inherit;color:var(--ink);background:var(--chip);cursor:pointer;transition:background .2s,color .2s,transform .15s}
+.chips button:active{transform:scale(.94)}
+.chips button[aria-pressed="true"]{background:var(--on);color:var(--onink)}
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
+/* 01 morph */
+.island{position:absolute;top:calc(14 * var(--u));left:50%;width:calc(120 * var(--u));height:calc(34 * var(--u));border-radius:calc(17 * var(--u));background:#000;transform:translateX(-50%);color:#fff;overflow:hidden;box-shadow:0 calc(10 * var(--u)) calc(30 * var(--u)) rgba(0,0,0,.35)}
+.c{position:absolute;inset:0;display:flex;align-items:center;padding:0 calc(14 * var(--u));gap:calc(10 * var(--u));opacity:0;filter:blur(8px);transform:scale(.9);transition:opacity .18s,filter .18s,transform .25s;pointer-events:none;font-size:calc(13 * var(--u))}
+.island[data-s="timer"] .timer,.island[data-s="music"] .music,.island[data-s="trip"] .trip{opacity:1;filter:none;transform:none;transition-delay:.14s}
+.txt{display:grid;gap:2px;flex:1;min-width:0}.txt b{font-size:1em;font-weight:600;white-space:nowrap}.txt small{font-size:.85em;color:rgba(255,255,255,.6);white-space:nowrap}
+.ring{width:calc(28 * var(--u));height:calc(28 * var(--u));transform:rotate(-90deg);flex:none}
+.ring circle,.big circle{fill:none;stroke-width:3}.ring .tr,.big .tr{stroke:rgba(255,255,255,.18)}
+.ring .pg{stroke:var(--ac);stroke-linecap:round;stroke-dasharray:69.1;stroke-dashoffset:69.1;transition:stroke-dashoffset 1s linear}
+.timer .lbl{flex:1;font-weight:600}.num{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ac)}
+.eq{display:flex;align-items:center;gap:calc(3 * var(--u));height:calc(26 * var(--u))}
+.eq i,.wave i{width:calc(3 * var(--u));height:100%;border-radius:2px;background:var(--ac);transform-origin:center;animation:eq .9s ease-in-out infinite alternate}
+.eq i:nth-child(2),.wave i:nth-child(2){animation-delay:-.3s}.eq i:nth-child(3),.wave i:nth-child(3){animation-delay:-.6s}.eq i:nth-child(4),.wave i:nth-child(4){animation-delay:-.15s}.wave i:nth-child(5){animation-delay:-.45s}
+@keyframes eq{from{transform:scaleY(.25)}to{transform:scaleY(1)}}
+.pause{display:flex;gap:calc(3 * var(--u))}.pause i{width:calc(4 * var(--u));height:calc(14 * var(--u));border-radius:2px;background:#fff}
+.trip{flex-direction:column;align-items:stretch;justify-content:center;gap:calc(14 * var(--u));padding:0 calc(22 * var(--u))}
+.trip .row{display:flex;align-items:center;gap:calc(12 * var(--u))}.trip .txt b{font-size:calc(17 * var(--u))}
+.badge{display:grid;place-items:center;width:calc(36 * var(--u));height:calc(36 * var(--u));border-radius:50%;background:var(--ac);color:#000;font-weight:700;font-size:calc(16 * var(--u))}
+.track{height:calc(6 * var(--u));border-radius:9px;background:rgba(255,255,255,.16)}
+.fill{position:relative;height:100%;width:6%;border-radius:9px;background:var(--ac);transition:width 1s cubic-bezier(.2,.8,.2,1)}
+.fill::after{content:"";position:absolute;right:calc(-5 * var(--u));top:50%;width:calc(14 * var(--u));height:calc(14 * var(--u));margin-top:calc(-7 * var(--u));border-radius:50%;background:#fff;box-shadow:0 0 0 calc(4 * var(--u)) rgba(255,255,255,.2)}
+.island[data-s="trip"] .fill{width:68%;transition-delay:.3s}
+/* 02 split */
+.goo{position:absolute;inset:0;filter:url(#goo)}
+.shape{position:absolute;top:calc(14 * var(--u));height:calc(36 * var(--u));border-radius:999px;background:#000}
+.pl,.bc{position:absolute;top:calc(14 * var(--u));height:calc(36 * var(--u));color:#fff;font-size:calc(13 * var(--u))}
+.pl .k,.bc .k{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:calc(8 * var(--u));opacity:0;filter:blur(6px);transition:opacity .18s,filter .18s;white-space:nowrap}
+#s2[data-s="call"] .k.call,#s2[data-s="chg"] .k.chg{opacity:1;filter:none;transition-delay:.16s}
+.pl b{font-weight:600}.pl small{color:rgba(255,255,255,.65);font-variant-numeric:tabular-nums}.pl small.ok{color:var(--ok);font-weight:600}
+.wave{display:flex;align-items:center;gap:calc(2.5 * var(--u));height:calc(16 * var(--u))}.wave i{width:calc(2.5 * var(--u));background:var(--ok)}
+.bc svg{width:calc(18 * var(--u));height:calc(18 * var(--u));fill:none;stroke:var(--ok);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.bc .call{box-shadow:0 0 0 0 rgba(52,211,153,.5);border-radius:50%;animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{to{box-shadow:0 0 0 calc(12 * var(--u)) rgba(52,211,153,0)}}
+.bc svg.big{width:calc(36 * var(--u));height:calc(36 * var(--u));transform:rotate(-90deg);stroke-width:0}
+.big circle{stroke-width:3}.big .pg2{stroke:var(--ok);stroke-linecap:round;stroke-dasharray:94.2;stroke-dashoffset:94.2;transition:stroke-dashoffset 1s cubic-bezier(.2,.8,.2,1) .2s}
+#s2[data-s="chg"] .pg2{stroke-dashoffset:17}
+.bolt{fill:var(--ok);stroke:none;transform:rotate(90deg);transform-origin:19px 19px}
+@media (prefers-reduced-motion:reduce){.eq i,.wave i,.bc .call{animation:none}.c,.k{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <p class="h">01 &middot; Morph</p>
+  <section class="stage" id="s1" aria-label="Morphing island demo">
+    <div class="wall"></div>
+    <div class="clock">9:41</div>
+    <div class="island" id="isl" data-s="idle">
+      <div class="c timer"><svg class="ring" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" class="tr"/><circle cx="14" cy="14" r="11" class="pg" id="pg"/></svg><span class="lbl">Focus</span><span class="num" id="tm">05:00</span></div>
+      <div class="c music"><span class="eq"><i></i><i></i><i></i><i></i></span><span class="txt"><b>Midnight Drive</b><small>Neon Harbor</small></span><span class="pause"><i></i><i></i></span></div>
+      <div class="c trip"><div class="row"><span class="txt"><b>Arriving in 6 min</b><small>Sara is 1.2 km away</small></span><span class="badge">6</span></div><div class="track"><div class="fill"></div></div></div>
+    </div>
+    <span class="sr" id="live1" aria-live="polite"></span>
+  </section>
+  <nav class="chips" id="c1" aria-label="Morph states"><button data-s="idle" aria-pressed="true">Idle</button><button data-s="timer" aria-pressed="false">Timer</button><button data-s="music" aria-pressed="false">Music</button><button data-s="trip" aria-pressed="false">Trip</button></nav>
+
+  <p class="h">02 &middot; Split</p>
+  <section class="stage" id="s2" data-s="idle" aria-label="Splitting island demo">
+    <div class="wall"></div>
+    <div class="clock">9:41</div>
+    <div class="goo" id="goo"><div class="shape" id="pillS"></div><div class="shape" id="bubS"></div></div>
+    <div class="pl" id="pl">
+      <div class="k call"><span class="wave"><i></i><i></i><i></i><i></i><i></i></span><b>Sara</b><small id="ct">00:12</small></div>
+      <div class="k chg"><b>Charging</b><small class="ok">82%</small></div>
+    </div>
+    <div class="bc" id="bc">
+      <div class="k call"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      <div class="k chg"><svg viewBox="0 0 38 38" class="big"><circle cx="19" cy="19" r="15" class="tr"/><circle cx="19" cy="19" r="15" class="pg2"/><polygon points="20.5 10 13 21 18.5 21 17.5 28 25 17 19.5 17 20.5 10" class="bolt"/></svg></div>
+    </div>
+    <span class="sr" id="live2" aria-live="polite"></span>
+  </section>
+  <nav class="chips" id="c2" aria-label="Split states"><button data-s="idle" aria-pressed="true">Idle</button><button data-s="call" aria-pressed="false">Call</button><button data-s="chg" aria-pressed="false">Charge</button></nav>
+</main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>
+<script>
+(function(){
+  var rm=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // hash options: #aurora #sunset #light #dark #auto  (join with -, e.g. #sunset-dark-auto)
+  var t=location.hash.slice(1).split('-'),r=document.documentElement;
+  if(t.indexOf('sunset')>-1)r.setAttribute('data-skin','sunset');
+  if(t.indexOf('light')>-1)r.setAttribute('data-theme','light');
+  if(t.indexOf('dark')>-1)r.setAttribute('data-theme','dark');
+  var auto=t.indexOf('auto')>-1;
+
+  var $=function(id){return document.getElementById(id);};
+  var springs=[],raf=0,last=0,u=1,renders=[];
+  function S(x,z,w){var s={x:x,v:0,t:x,z:z,w:rm?70:w};springs.push(s);return s;}
+  function step(s,dt){var a=s.w*s.w*(s.t-s.x)-2*s.z*s.w*s.v;s.v+=a*dt;s.x+=s.v*dt;}
+  function measure(){u=$('s1').getBoundingClientRect().width/420;}
+  function render(){renders.forEach(function(f){f();});}
+  function settled(s){return Math.abs(s.t-s.x)<.01&&Math.abs(s.v)<.1;}
+  function frame(now){
+    var dt=Math.min((now-last)/1000,1/30);last=now;
+    var n=Math.max(1,Math.round(dt*240));
+    for(var k=0;k<n;k++)springs.forEach(function(s){step(s,dt/n);});
+    render();
+    if(springs.every(settled)){springs.forEach(function(s){s.x=s.t;s.v=0;});render();raf=0;return;}
+    raf=requestAnimationFrame(frame);
+  }
+  function go(){if(!raf){last=performance.now();raf=requestAnimationFrame(frame);}}
+  measure();addEventListener('resize',function(){measure();render();});
+
+  function chips(id,fn){
+    var nav=$(id),bs=[].slice.call(nav.querySelectorAll('button'));
+    bs.forEach(function(b){b.addEventListener('click',function(){fn(b.dataset.s);});});
+    return function(s){bs.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.s===s);});};
+  }
+
+  /* 01 morph: width and height are springs, content cross-fades with blur */
+  var A={idle:[120,34],timer:[224,50],music:[264,56],trip:[360,124]},AL={idle:'Idle',timer:'Focus timer',music:'Now playing',trip:'Trip arriving in 6 minutes'};
+  var isl=$('isl'),aw=S(120,.62,16),ah=S(34,.62,16),left=300,tmr=0;
+  renders.push(function(){
+    isl.style.width=aw.x*u+'px';isl.style.height=ah.x*u+'px';
+    isl.style.borderRadius=Math.min(ah.x/2,34)*u+'px';
+  });
+  function tick(){
+    left=Math.max(0,left-1);
+    var m=('0'+Math.floor(left/60)).slice(-2),s=('0'+left%60).slice(-2);
+    $('tm').textContent=m+':'+s;
+    $('pg').style.strokeDashoffset=69.1*(1-left/300);
+  }
+  var mark1=chips('c1',set1);
+  function set1(s){
+    isl.dataset.s=s;aw.t=A[s][0];ah.t=A[s][1];mark1(s);$('live1').textContent=AL[s];
+    clearInterval(tmr);
+    if(s==='timer'){left=300;$('pg').style.strokeDashoffset=0;tick();tmr=setInterval(tick,1000);}
+    go();
+  }
+
+  /* 02 split: a pill and a bubble inside a gooey filter; the bubble springs out and leaves a neck */
+  var B={idle:{w:130,pc:0,bc:0,bs:.3},call:{w:168,pc:-34,bc:92,bs:1},chg:{w:150,pc:-30,bc:86,bs:1}},BL={idle:'Idle',call:'Call with Sara',chg:'Charging 82 percent'};
+  var s2=$('s2'),pw=S(130,.7,15),pc=S(0,.7,15),bc=S(0,.5,13),bs=S(.3,.6,15),ctm=0,cs=12;
+  var pillS=$('pillS'),bubS=$('bubS'),pl=$('pl'),bcEl=$('bc');
+  renders.push(function(){
+    var l=(210+pc.x-pw.x/2)*u,w=pw.x*u;
+    pillS.style.left=pl.style.left=l+'px';pillS.style.width=pl.style.width=w+'px';
+    var bl=(210+bc.x-18)*u,sc=Math.max(bs.x,0);
+    bubS.style.left=bcEl.style.left=bl+'px';
+    bubS.style.width=bubS.style.height=bcEl.style.width=bcEl.style.height=36*u+'px';
+    bubS.style.top=bcEl.style.top=14*u+'px';
+    bubS.style.transform='scale('+sc+')';
+  });
+  var mark2=chips('c2',set2);
+  function set2(s){
+    var o=B[s];s2.dataset.s=s;pw.t=o.w;pc.t=o.pc;bc.t=o.bc;bs.t=o.bs;mark2(s);$('live2').textContent=BL[s];
+    clearInterval(ctm);
+    if(s==='call'){cs=12;ctm=setInterval(function(){cs++;$('ct').textContent='00:'+('0'+cs).slice(-2);},1000);}
+    go();
+  }
+  set1('idle');set2('idle');measure();render();
+
+  if(auto){
+    var a1=['timer','music','trip','idle'],a2=['call','chg','idle'],i1=0,i2=0;
+    setInterval(function(){set1(a1[i1++%a1.length]);},2800);
+    setTimeout(function(){setInterval(function(){set2(a2[i2++%a2.length]);},2800);},1400);
+  }
+})();
+</script>
+</body>
+</html>

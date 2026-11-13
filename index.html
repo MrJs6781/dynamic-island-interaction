@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dynamic Island</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <p class="h">01 &middot; Morph</p>
+  <section class="stage" id="s1" aria-label="Morphing island demo">
+    <div class="wall"></div>
+    <div class="clock">9:41</div>
+    <div class="island" id="isl" data-s="idle">
+      <div class="c timer"><svg class="ring" viewBox="0 0 28 28"><circle cx="14" cy="14" r="11" class="tr"/><circle cx="14" cy="14" r="11" class="pg" id="pg"/></svg><span class="lbl">Focus</span><span class="num" id="tm">05:00</span></div>
+      <div class="c music"><span class="eq"><i></i><i></i><i></i><i></i></span><span class="txt"><b>Midnight Drive</b><small>Neon Harbor</small></span><span class="pause"><i></i><i></i></span></div>
+      <div class="c trip"><div class="row"><span class="txt"><b>Arriving in 6 min</b><small>Sara is 1.2 km away</small></span><span class="badge">6</span></div><div class="track"><div class="fill"></div></div></div>
+    </div>
+    <span class="sr" id="live1" aria-live="polite"></span>
+  </section>
+  <nav class="chips" id="c1" aria-label="Morph states"><button data-s="idle" aria-pressed="true">Idle</button><button data-s="timer" aria-pressed="false">Timer</button><button data-s="music" aria-pressed="false">Music</button><button data-s="trip" aria-pressed="false">Trip</button></nav>
+
+  <p class="h">02 &middot; Split</p>
+  <section class="stage" id="s2" data-s="idle" aria-label="Splitting island demo">
+    <div class="wall"></div>
+    <div class="clock">9:41</div>
+    <div class="goo" id="goo"><div class="shape" id="pillS"></div><div class="shape" id="bubS"></div></div>
+    <div class="pl" id="pl">
+      <div class="k call"><span class="wave"><i></i><i></i><i></i><i></i><i></i></span><b>Sara</b><small id="ct">00:12</small></div>
+      <div class="k chg"><b>Charging</b><small class="ok">82%</small></div>
+    </div>
+    <div class="bc" id="bc">
+      <div class="k call"><svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div>
+      <div class="k chg"><svg viewBox="0 0 38 38" class="big"><circle cx="19" cy="19" r="15" class="tr"/><circle cx="19" cy="19" r="15" class="pg2"/><polygon points="20.5 10 13 21 18.5 21 17.5 28 25 17 19.5 17 20.5 10" class="bolt"/></svg></div>
+    </div>
+    <span class="sr" id="live2" aria-live="polite"></span>
+  </section>
+  <nav class="chips" id="c2" aria-label="Split states"><button data-s="idle" aria-pressed="true">Idle</button><button data-s="call" aria-pressed="false">Call</button><button data-s="chg" aria-pressed="false">Charge</button></nav>
+</main>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><filter id="goo"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feColorMatrix in="b" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -9"/></filter></svg>
+<script src="script.js"></script>
+</body>
+</html>
